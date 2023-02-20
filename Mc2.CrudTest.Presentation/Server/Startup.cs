@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+using MediatR;
+using System.Reflection;
+using Mc2.CrudTest.Presentation.Server.Services;
 
 namespace Mc2.CrudTest.Presentation.Server
 {
@@ -19,9 +23,17 @@ namespace Mc2.CrudTest.Presentation.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            //services.AddSqlConnection(Configuration);
+            services.AddControllers();
+            services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddValidators();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Customer API", Version = "v1" });
+            });
 
-            services.AddControllersWithViews();
-            services.AddRazorPages();
+            //services.AddScoped<ICustomerRepository,CustomerRepository>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -31,6 +43,12 @@ namespace Mc2.CrudTest.Presentation.Server
             {
                 app.UseDeveloperExceptionPage();
                 app.UseWebAssemblyDebugging();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Customer API V1");
+                    c.RoutePrefix = "";
+                });
             }
             else
             {
@@ -40,16 +58,16 @@ namespace Mc2.CrudTest.Presentation.Server
             }
 
             app.UseHttpsRedirection();
-            app.UseBlazorFrameworkFiles();
+           
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapRazorPages();
+               
                 endpoints.MapControllers();
-                endpoints.MapFallbackToFile("index.html");
+               
             });
         }
     }
